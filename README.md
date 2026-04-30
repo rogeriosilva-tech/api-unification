@@ -5,8 +5,29 @@
 ![Go](https://img.shields.io/badge/go-%2300ADD8.svg?style=for-the-badge&logo=go&logoColor=white)
 ![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)
 
-Focado especificamente na configuração do serviço API Gateway
+### 📌 Contexto e Cenário Atual
 
+As APIs Agreement, Auditor e Conversify operam via API Gateway + Lambda Authorizers. A autenticação é 100% delegada ao Gateway; as aplicações no ECS são "confiadas" e não validam tokens internamente.
+
+Legado (Desafio)
+Os serviços Hooks-API e Reports-API possuem exposição pública direta e utilizam Basic Token.
+
+**Alvo:** Integrar o frontend do Agreement a ambos os serviços, centralizando as credenciais no Gateway existente e simplificando o consumo para o time de Front-end.
+
+### 📊 Comparativo de Arquitetura
+
+| Camada | 🛡️ Serviços Modernos | 🏛️ Serviços Legados |
+| :--- | :--- | :--- |
+| **Serviços** | `Agreement`, `Auditor`, `Conversify` | `Hooks-API`, `Reports-API` |
+| **Infraestrutura** | ![API Gateway](https://img.shields.io/badge/-API%20Gateway-blue) | ![Public IP](https://img.shields.io/badge/-Exposição%20Direta-orange) |
+| **Autenticação** | **Delegada** (Lambda Authorizer) | **Local** (Basic Token) |
+| **Validação ECS** | 🟢 Não necessária (Confiança) | 🔴 Obrigatória na Aplicação |
+| **Ponto de Ingress** | `apigw.nuvidio.com` | `api.nuvidio.com/hooks` |
+
+### 🎯 O Desafio de Unificação
+O objetivo deste projeto é transicionar os **Serviços Legados** para o padrão de **Segurança Perimetral**, permitindo que o Frontend consuma todos os recursos através de um único ponto de entrada, sem gerenciar múltiplas credenciais.
+
+---
 Para implementar a criação de endpoints com novo path (/api/v2) sem autenticação será implantada a solução técnica em três frentes: 
 * configurar o API Gateway (HTTP API)
 * criar as regras no ALB
