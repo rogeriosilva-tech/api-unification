@@ -29,8 +29,9 @@ O objetivo deste projeto é transicionar os **Serviços Legados** para o padrão
 
 ---
 Para implementar a criação de endpoints com novo path (/api/v2) sem autenticação será implantada a solução técnica em três frentes: 
-* configurar o API Gateway (HTTP API)
-* criar as regras no ALB
+
+* Configurar o API Gateway (HTTP API)
+* Criar as regras no ALB
 * Garantir que os cabeçalhos de segurança sejam injetados.
 
 ### 1. Criar Integração e Rota no API Gateway (HTTP API)
@@ -64,7 +65,7 @@ aws apigatewayv2 create-route \
 ### 2. Configurar Regras de Listener no ALB
 Agora, no Load Balancer, precisamos garantir que o tráfego da /v2 só seja aceito se contiver o header correto.
 
-### Criar regra de prioridade para a V2:
+**Criar regra de prioridade para a** V2:
 ```bash
 aws elbv2 create-rule \
     --listener-arn <ARN_DO_LISTENER_HTTPS_443> \
@@ -84,7 +85,7 @@ aws elbv2 create-rule \
     ]' \
     --actions Type=forward,TargetGroupArn=<ARN_DO_TARGET_GROUP_HOOKS>
 ```
-### Criar regra de bloqueio (Segurança Extra):
+**Criar regra de bloqueio** (Segurança Extra):
 Caso alguém tente acessar a /v2 diretamente pela URL pública do ALB sem o header, o ALB deve retornar 403.
 ```bash
 aws elbv2 create-rule \
@@ -120,7 +121,7 @@ Listar rotas do Gateway: aws apigatewayv2 get-routes --api-id <ID>
 Verificar regras do ALB: aws elbv2 describe-rules --listener-arn <ARN>
 ```
 
-## Fluxo de comunicação
+**Fluxo de comunicação**
 
 Essa é a **chave** que transforma o  Load Balancer em um porteiro inteligente. Sem essa conexão, a rota /api/v2 ficaria exposta na internet para qualquer um acessar diretamente, ignorando o API Gateway e o Lambda Authorizer.
 
@@ -161,4 +162,4 @@ O segredo é interno: O usuário final nunca vê o valor do X-Origin-Verify. Ele
 
 * ECS → Vê o path /v2 → Processa a requisição sem pedir senha.
 
-Isso fecha o ciclo da Opção A com segurança perimetral completa.
+Isso fecha o ciclo da Opção escolhida pela Engenharia com segurança perimetral completa.
